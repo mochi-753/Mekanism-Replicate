@@ -35,5 +35,5 @@ description='''${mod_description}'''
 modId="mekanism"
 type="required"
 versionRange="${mekanism_version_range}"
-ordering="AFTER"
+ordering="NONE"
 side="BOTH"

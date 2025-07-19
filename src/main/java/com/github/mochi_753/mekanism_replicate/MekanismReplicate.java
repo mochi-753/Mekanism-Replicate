@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 public class MekanismReplicate {
     public static final String MOD_ID = "mekanism_replicate";
     public static final String MOD_NAME = "Mekanism: Replicate";
-    public static final String MOD_VERSION = "0.3.1";
+    public static final String MOD_VERSION = "0.4.0";
 
     public static final Logger LOGGER = LogUtils.getLogger();
 
@@ -26,6 +26,7 @@ public class MekanismReplicate {
         ModItems.register(bus);
         ModTabs.register(bus);
         ModMenuTypes.register(bus);
+        ModChemicals.register(bus);
     }
 
     @EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT)

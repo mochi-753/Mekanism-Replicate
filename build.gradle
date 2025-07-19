@@ -58,9 +58,8 @@ dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
 
     compileOnly("mekanism:Mekanism:${mekanism_version}:api")
-
-    runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
-    runtimeOnly("mekanism:Mekanism:${mekanism_version}:all")
+    implementation("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
+    implementation("mekanism:Mekanism:${mekanism_version}:all")
 }
 
 tasks.withType(ProcessResources).configureEach {

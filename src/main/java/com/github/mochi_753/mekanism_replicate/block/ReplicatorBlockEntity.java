@@ -81,7 +81,7 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("menu.mekanism_replicate.replicator");
+        return Component.translatable("block.mekanism_replicate.replicator");
     }
 
     @Override

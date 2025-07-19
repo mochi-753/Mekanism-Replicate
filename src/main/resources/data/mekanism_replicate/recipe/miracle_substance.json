@@ -1,0 +1,11 @@
+{
+  "type": "mekanism:activating",
+  "input": {
+    "amount": 10,
+    "chemical": "mekanism:antimatter"
+  },
+  "output": {
+    "amount": 1,
+    "id": "mekanism_replicate:miracle_substance"
+  }
+}

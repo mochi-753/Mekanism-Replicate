@@ -1,7 +1,14 @@
 package com.github.mochi_753.mekanism_replicate.block;
 
+import com.github.mochi_753.mekanism_replicate.MekanismReplicate;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -9,6 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nullable;
 
@@ -26,7 +34,7 @@ public class ReplicatorBlock extends BaseEntityBlock {
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return null;
+        return new ReplicatorBlockEntity(pos, state);
     }
 
     @Override
@@ -42,5 +50,22 @@ public class ReplicatorBlock extends BaseEntityBlock {
                 replicatorBlockEntity.tick();
             }
         };
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!level.isClientSide) {
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof ReplicatorBlockEntity replicatorBlockEntity) {
+                if (player instanceof ServerPlayer serverPlayer) {
+                    serverPlayer.openMenu(new SimpleMenuProvider(replicatorBlockEntity,
+                            Component.translatable("block.mekanism_replicate.replicator")), pos);
+                }
+            } else {
+                MekanismReplicate.LOGGER.error("ReplicatorBlockEntity is missing.{}", pos);
+                return InteractionResult.FAIL;
+            }
+        }
+        return InteractionResult.SUCCESS;
     }
 }

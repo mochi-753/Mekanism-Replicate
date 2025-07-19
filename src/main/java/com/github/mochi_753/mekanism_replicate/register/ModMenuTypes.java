@@ -15,7 +15,9 @@ public class ModMenuTypes {
 
     public static void register(IEventBus bus) {
         MENUS.register(bus);
-    }    public static final DeferredHolder<MenuType<?>, MenuType<ReplicatorMenu>> REPLICATOR_MENU = MENUS.register(
+    }
+
+    public static final DeferredHolder<MenuType<?>, MenuType<ReplicatorMenu>> REPLICATOR_MENU = MENUS.register(
             "replicator", () -> IMenuTypeExtension.create(ReplicatorMenu::new)
     );
 

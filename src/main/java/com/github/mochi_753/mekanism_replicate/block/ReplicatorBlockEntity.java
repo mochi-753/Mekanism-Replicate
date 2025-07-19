@@ -6,7 +6,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -20,9 +25,13 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
     private static final int OUTPUT_SLOT = 1;
     // protected final ContainerData data;
 
-    private static final ItemStackHandler handler = new ItemStackHandler(2) {
+    private final ItemStackHandler handler = new ItemStackHandler(2) {
         @Override
         protected void onContentsChanged(int slot) {
+            setChanged();
+            if (!level.isClientSide) {
+                level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+            }
         }
     };
 
@@ -44,8 +53,27 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
         handler.deserializeNBT(registries, tag.getCompound("inventory"));
     }
 
+    public void drops() {
+        SimpleContainer inventory = new SimpleContainer(handler.getSlots());
+        for (int i = 0; i < handler.getSlots(); i++) {
+            inventory.setItem(i, handler.getStackInSlot(i));
+        }
+        Containers.dropContents(this.level, this.worldPosition, inventory);
+    }
+
     public ItemStackHandler getHandler() {
         return handler;
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return saveWithoutMetadata(registries);
+    }
+
+    @Nullable
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     public void tick() {

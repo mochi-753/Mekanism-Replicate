@@ -23,13 +23,14 @@ public class ReplicatorMenu extends AbstractContainerMenu {
     private static final int VANILLA_SLOT_COUNT = HOTBAR_SLOT_COUNT + PLAYER_INVENTORY_SLOT_COUNT;
     private static final int VANILLA_FIRST_SLOT_INDEX = 0;
     private static final int BE_INVENTORY_FIRST_SLOT_INDEX = VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT;
-
     private static final int BE_INVENTORY_SLOT_COUNT = 2;
     public final ReplicatorBlockEntity replicatorBlockEntity;
     private final Level level;
+
     public ReplicatorMenu(int containerId, Inventory inventory, FriendlyByteBuf extraData) {
         this(containerId, inventory, inventory.player.level().getBlockEntity(extraData.readBlockPos()));
     }
+
     public ReplicatorMenu(int containerId, Inventory inventory, BlockEntity blockEntity) {
         super(ModMenuTypes.REPLICATOR_MENU.get(), containerId);
         this.replicatorBlockEntity = ((ReplicatorBlockEntity) blockEntity);

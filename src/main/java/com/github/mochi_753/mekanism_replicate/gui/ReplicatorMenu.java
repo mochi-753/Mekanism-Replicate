@@ -8,6 +8,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -28,6 +29,29 @@ public class ReplicatorMenu extends AbstractContainerMenu {
     public final ReplicatorBlockEntity replicatorBlockEntity;
     private final Level level;
 
+    private final ContainerData data = new ContainerData() {
+        @Override
+        public int get(int index) {
+            if (index == 0) {
+                return replicatorBlockEntity.getProgress();
+            }
+            if (index == 1) {
+                return replicatorBlockEntity.getMaxProgress();
+            }
+            return 0;
+        }
+
+        @Override
+        public void set(int index, int value) {
+            if (index == 0) replicatorBlockEntity.setProgress(value);
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+    };
+
     public ReplicatorMenu(int containerId, Inventory inventory, FriendlyByteBuf extraData) {
         this(containerId, inventory, inventory.player.level().getBlockEntity(extraData.readBlockPos()));
     }
@@ -37,15 +61,25 @@ public class ReplicatorMenu extends AbstractContainerMenu {
         this.replicatorBlockEntity = ((ReplicatorBlockEntity) blockEntity);
         this.level = inventory.player.level();
 
+        addDataSlots(data);
+
         addPlayerInventory(inventory);
 
         this.addSlot(new SlotItemHandler(replicatorBlockEntity.getHandler(), 0, 80, 20));
-        this.addSlot(new SlotItemHandler(replicatorBlockEntity.getHandler(), 1, 116, 50){
+        this.addSlot(new SlotItemHandler(replicatorBlockEntity.getHandler(), 1, 116, 50) {
             @Override
             public boolean mayPlace(@NotNull ItemStack stack) {
                 return false;
             }
         });
+    }
+
+    public int getProgress() {
+        return data.get(0);
+    }
+
+    public int getMaxProgress() {
+        return data.get(1);
     }
 
     @Override

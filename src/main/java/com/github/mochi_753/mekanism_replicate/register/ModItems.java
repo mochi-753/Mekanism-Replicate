@@ -13,7 +13,7 @@ public class ModItems {
     private static final DeferredRegister<Item> ITEMS = DeferredRegister
             .create(BuiltInRegistries.ITEM, MekanismReplicate.MOD_ID);
 
-    public static final Supplier<Item> REPLICATOR = ITEMS.register("example_item",
+    public static final Supplier<Item> REPLICATOR = ITEMS.register("replicator",
             () -> new BlockItem(ModBlocks.REPLICATOR.get(), new Item.Properties()));
 
     public static void register(IEventBus bus) {

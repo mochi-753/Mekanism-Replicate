@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.items.SlotItemHandler;
+import org.jetbrains.annotations.NotNull;
 
 public class ReplicatorMenu extends AbstractContainerMenu {
     private static final int HOTBAR_SLOT_COUNT = 9;
@@ -39,7 +40,12 @@ public class ReplicatorMenu extends AbstractContainerMenu {
         addPlayerInventory(inventory);
 
         this.addSlot(new SlotItemHandler(replicatorBlockEntity.getHandler(), 0, 80, 20));
-        this.addSlot(new SlotItemHandler(replicatorBlockEntity.getHandler(), 1, 116, 50));
+        this.addSlot(new SlotItemHandler(replicatorBlockEntity.getHandler(), 1, 116, 50){
+            @Override
+            public boolean mayPlace(@NotNull ItemStack stack) {
+                return false;
+            }
+        });
     }
 
     @Override

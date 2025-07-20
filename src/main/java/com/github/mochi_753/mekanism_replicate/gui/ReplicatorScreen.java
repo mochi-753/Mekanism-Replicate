@@ -29,15 +29,10 @@ public class ReplicatorScreen extends AbstractContainerScreen<ReplicatorMenu> {
         int y = (height - imageHeight) / 2;
 
         guiGraphics.blit(GUI_TEXTURE, x, y, 0, 0, imageWidth, imageHeight);
+    }
 
-        minecraft.getTextureManager().bindForSetup(BAR_TEXTURE);
-        guiGraphics.blit(BAR_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
-
-        // プログレスバーの幅を計算
-        int progressWidth = (int) ((menu.getProgress() / (float) menu.getMaxProgress()) * 30);
-
-        // プログレスバー描画
-        guiGraphics.blit(BAR_TEXTURE, leftPos + 45, topPos + 40, 0, 0, progressWidth, 7);
+    private void renderProgressBar(GuiGraphics guiGraphics, int x, int y) {
+        guiGraphics.blit(BAR_TEXTURE, x + 46, x + 40, 0, 0, menu.getScaledBarProgress(), 7, 29, 7);
     }
 
     @Override

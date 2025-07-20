@@ -82,6 +82,14 @@ public class ReplicatorMenu extends AbstractContainerMenu {
         return data.get(1);
     }
 
+    public int getScaledBarProgress() {
+        int progress = getProgress();
+        int maxProgress = getMaxProgress();
+        int barPixelSize = 29;
+
+        return maxProgress != 0 && progress != 0 ? progress * barPixelSize / maxProgress : 0;
+    }
+
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         Slot slot = slots.get(index);

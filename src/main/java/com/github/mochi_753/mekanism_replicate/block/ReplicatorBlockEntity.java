@@ -1,11 +1,13 @@
 package com.github.mochi_753.mekanism_replicate.block;
 
+import com.github.mochi_753.mekanism_replicate.MekanismReplicate;
 import com.github.mochi_753.mekanism_replicate.gui.ReplicatorMenu;
 import com.github.mochi_753.mekanism_replicate.register.ModBlockEntities;
 import mekanism.common.registries.MekanismItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -43,15 +45,37 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
         }
     };
     // protected final ContainerData data;
-    private int PROGRESS;
+    private int progress = 0;
 
     public ReplicatorBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.REPLICATOR.get(), pos, blockState);
     }
 
+    private void resetProgress() {
+        setProgress(0);
+    }
+
+    public int getProgress() {
+        return this.progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+        setChanged();
+    }
+
+    public int getMaxProgress() {
+        return MAX_PROGRESS;
+    }
+
+    public ItemStackHandler getHandler() {
+        return handler;
+    }
+
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.@NotNull Provider registries) {
         tag.put("inventory", handler.serializeNBT(registries));
+        tag.putInt("progress", progress);
 
         super.saveAdditional(tag, registries);
     }
@@ -61,6 +85,25 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
         super.loadAdditional(tag, registries);
 
         handler.deserializeNBT(registries, tag.getCompound("inventory"));
+        this.progress = tag.getInt("progress");
+    }
+
+    @Override
+    public @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries) {
+        return saveWithoutMetadata(registries);
+    }
+
+
+    @Nullable
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    // FIXME: progressが変化しない
+    public void tick() {
+        if (level == null || level.isClientSide) { return; }
+        replicate();
     }
 
     public void drops() {
@@ -69,28 +112,6 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
             inventory.setItem(i, handler.getStackInSlot(i));
         }
         Containers.dropContents(this.level, this.worldPosition, inventory);
-    }
-
-    public ItemStackHandler getHandler() {
-        return handler;
-    }
-
-    @Override
-    public @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries) {
-        return saveWithoutMetadata(registries);
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientGamePacketListener> getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
-    }
-
-    public void tick() {
-        if (level == null || level.isClientSide) {
-        }
-
-
     }
 
     @Override
@@ -112,14 +133,16 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
             return;
         }
 
-        if (ItemStack.isSameItemSameComponents(inputStack, outputStack)) {
+        if (!outputStack.isEmpty() && !ItemStack.isSameItemSameComponents(inputStack, outputStack)) {
             resetProgress();
             return;
         }
 
+        MekanismReplicate.LOGGER.info(String.valueOf(getProgress()));
+
         setProgress(getProgress() + 1);
 
-        if (MAX_PROGRESS <= PROGRESS) {
+        if (getMaxProgress() <= getProgress()) {
             if (outputStack.isEmpty()) {
                 handler.setStackInSlot(OUTPUT_SLOT, inputStack.copyWithCount(1));
             } else if (ItemStack.isSameItemSameComponents(inputStack, outputStack) && outputStack.getCount() < outputStack.getMaxStackSize()) {
@@ -148,21 +171,5 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
         }
 
 
-    }
-
-    private void resetProgress() {
-        setProgress(0);
-    }
-
-    public int getProgress() {
-        return PROGRESS;
-    }
-
-    public void setProgress(int progress) {
-        this.PROGRESS = progress;
-    }
-
-    public int getMaxProgress() {
-        return MAX_PROGRESS;
     }
 }

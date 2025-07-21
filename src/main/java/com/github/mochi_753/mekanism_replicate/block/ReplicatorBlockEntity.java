@@ -3,11 +3,9 @@ package com.github.mochi_753.mekanism_replicate.block;
 import com.github.mochi_753.mekanism_replicate.MekanismReplicate;
 import com.github.mochi_753.mekanism_replicate.gui.ReplicatorMenu;
 import com.github.mochi_753.mekanism_replicate.register.ModBlockEntities;
-import mekanism.common.registries.MekanismItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -18,8 +16,8 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
@@ -27,9 +25,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
-    private static final int MAX_PROGRESS = 120;
     private static final int INPUT_SLOT = 0;
     private static final int OUTPUT_SLOT = 1;
+    protected final ContainerData data;
     private final ItemStackHandler handler = new ItemStackHandler(2) {
         @Override
         protected void onContentsChanged(int slot) {
@@ -44,28 +42,36 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
             return slot != OUTPUT_SLOT;
         }
     };
-    // protected final ContainerData data;
     private int progress = 0;
+    private int maxProgress = 120;
 
     public ReplicatorBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.REPLICATOR.get(), pos, blockState);
-    }
+        data = new ContainerData() {
+            @Override
+            public int get(int index) {
+                return switch (index) {
+                    case 0 -> ReplicatorBlockEntity.this.progress;
+                    case 1 -> ReplicatorBlockEntity.this.maxProgress;
+                    default -> 0;
+                };
+            }
 
-    private void resetProgress() {
-        setProgress(0);
-    }
+            @Override
+            public void set(int index, int value) {
+                switch (index) {
+                    case 0:
+                        ReplicatorBlockEntity.this.progress = value;
+                    case 1:
+                        ReplicatorBlockEntity.this.maxProgress = value;
+                }
+            }
 
-    public int getProgress() {
-        return this.progress;
-    }
-
-    public void setProgress(int progress) {
-        this.progress = progress;
-        setChanged();
-    }
-
-    public int getMaxProgress() {
-        return MAX_PROGRESS;
+            @Override
+            public int getCount() {
+                return 2;
+            }
+        };
     }
 
     public ItemStackHandler getHandler() {
@@ -102,7 +108,9 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
 
     // FIXME: progressが変化しない
     public void tick() {
-        if (level == null || level.isClientSide) { return; }
+        if (level == null || level.isClientSide) {
+            return;
+        }
         replicate();
     }
 
@@ -121,7 +129,7 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player) {
-        return new ReplicatorMenu(containerId, inventory, this);
+        return new ReplicatorMenu(containerId, inventory, this, this.data);
     }
 
     private void replicate() {
@@ -138,11 +146,11 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
             return;
         }
 
-        MekanismReplicate.LOGGER.info(String.valueOf(getProgress()));
+        MekanismReplicate.LOGGER.info(String.valueOf(progress));
 
-        setProgress(getProgress() + 1);
+        increaseProgress();
 
-        if (getMaxProgress() <= getProgress()) {
+        if (maxProgress <= progress) {
             if (outputStack.isEmpty()) {
                 handler.setStackInSlot(OUTPUT_SLOT, inputStack.copyWithCount(1));
             } else if (ItemStack.isSameItemSameComponents(inputStack, outputStack) && outputStack.getCount() < outputStack.getMaxStackSize()) {
@@ -150,7 +158,7 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
                 handler.setStackInSlot(OUTPUT_SLOT, outputStack);
             }
 
-            // Check Antimatter Replicate
+            /*
             if (inputStack.is(MekanismItems.ANTIMATTER_PELLET) || outputStack.is(MekanismItems.ANTIMATTER_PELLET)) {
                 level.explode(null,
                         this.getBlockPos().getX() + 0.5,
@@ -163,13 +171,17 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
                 handler.setStackInSlot(INPUT_SLOT, ItemStack.EMPTY);
                 level.removeBlock(this.getBlockPos(), false);
             }
+            */
 
             resetProgress();
         }
-        if (!ItemStack.isSameItemSameComponents(inputStack, outputStack)) {
-            resetProgress();
-        }
+    }
 
+    private void resetProgress() {
+        progress = 0;
+    }
 
+    private void increaseProgress() {
+        progress++;
     }
 }

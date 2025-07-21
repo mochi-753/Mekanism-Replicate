@@ -7,10 +7,7 @@ import com.github.mochi_753.mekanism_replicate.register.ModMenuTypes;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -27,39 +24,18 @@ public class ReplicatorMenu extends AbstractContainerMenu {
     private static final int BE_INVENTORY_FIRST_SLOT_INDEX = VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT;
     private static final int BE_INVENTORY_SLOT_COUNT = 2;
     public final ReplicatorBlockEntity replicatorBlockEntity;
+    private final ContainerData data;
     private final Level level;
 
-    private final ContainerData data = new ContainerData() {
-        @Override
-        public int get(int index) {
-            if (index == 0) {
-                return replicatorBlockEntity.getProgress();
-            }
-            if (index == 1) {
-                return replicatorBlockEntity.getMaxProgress();
-            }
-            return 0;
-        }
-
-        @Override
-        public void set(int index, int value) {
-            if (index == 0) replicatorBlockEntity.setProgress(value);
-        }
-
-        @Override
-        public int getCount() {
-            return 2;
-        }
-    };
-
     public ReplicatorMenu(int containerId, Inventory inventory, FriendlyByteBuf extraData) {
-        this(containerId, inventory, inventory.player.level().getBlockEntity(extraData.readBlockPos()));
+        this(containerId, inventory, inventory.player.level().getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(2));
     }
 
-    public ReplicatorMenu(int containerId, Inventory inventory, BlockEntity blockEntity) {
+    public ReplicatorMenu(int containerId, Inventory inventory, BlockEntity blockEntity, ContainerData data) {
         super(ModMenuTypes.REPLICATOR_MENU.get(), containerId);
         this.replicatorBlockEntity = ((ReplicatorBlockEntity) blockEntity);
         this.level = inventory.player.level();
+        this.data = data;
 
         addDataSlots(data);
 

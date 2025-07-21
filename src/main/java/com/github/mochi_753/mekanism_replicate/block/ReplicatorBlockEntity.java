@@ -146,8 +146,6 @@ public class ReplicatorBlockEntity extends BlockEntity implements MenuProvider {
             return;
         }
 
-        MekanismReplicate.LOGGER.info(String.valueOf(progress));
-
         increaseProgress();
 
         if (maxProgress <= progress) {

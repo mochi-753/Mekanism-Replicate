@@ -29,10 +29,12 @@ public class ReplicatorScreen extends AbstractContainerScreen<ReplicatorMenu> {
         int y = (height - imageHeight) / 2;
 
         guiGraphics.blit(GUI_TEXTURE, x, y, 0, 0, imageWidth, imageHeight);
+
+        renderProgressBar(guiGraphics, x, y);
     }
 
     private void renderProgressBar(GuiGraphics guiGraphics, int x, int y) {
-        guiGraphics.blit(BAR_TEXTURE, x + 46, x + 40, 0, 0, menu.getScaledBarProgress(), 7, 29, 7);
+        guiGraphics.blit(BAR_TEXTURE, x + 46, y + 40, 0, 0, menu.getScaledBarProgress(), 7, 29, 7);
     }
 
     @Override

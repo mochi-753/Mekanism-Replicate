@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 public class MekanismReplicate {
     public static final String MOD_ID = "mekanism_replicate";
     public static final String MOD_NAME = "Mekanism: Replicate";
-    public static final String MOD_VERSION = "0.5.2";
+    public static final String MOD_VERSION = "0.5.3";
 
     public static final Logger LOGGER = LogUtils.getLogger();
 

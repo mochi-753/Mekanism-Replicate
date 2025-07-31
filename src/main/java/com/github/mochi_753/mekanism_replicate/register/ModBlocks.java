@@ -1,21 +1,32 @@
 package com.github.mochi_753.mekanism_replicate.register;
 
 import com.github.mochi_753.mekanism_replicate.MekanismReplicate;
-import com.github.mochi_753.mekanism_replicate.block.ReplicatorBlock;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockBehaviour;
+import com.github.mochi_753.mekanism_replicate.block.TileEntityReplicator;
+import mekanism.common.attachments.containers.ContainerType;
+import mekanism.common.attachments.containers.chemical.ChemicalTanksBuilder;
+import mekanism.common.attachments.containers.item.ItemSlotsBuilder;
+import mekanism.common.block.prefab.BlockTile;
+import mekanism.common.content.blocktype.Machine;
+import mekanism.common.item.block.ItemBlockTooltip;
+import mekanism.common.registration.impl.BlockDeferredRegister;
+import mekanism.common.registration.impl.BlockRegistryObject;
+import net.minecraft.world.level.material.MapColor;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredRegister;
-
-import java.util.function.Supplier;
 
 public class ModBlocks {
-    private static final DeferredRegister<Block> BLOCKS = DeferredRegister
-            .create(BuiltInRegistries.BLOCK, MekanismReplicate.MOD_ID);
+    private static final BlockDeferredRegister BLOCKS = new BlockDeferredRegister(MekanismReplicate.MOD_ID);
 
-    public static final Supplier<Block> REPLICATOR = BLOCKS.register("replicator",
-            () -> new ReplicatorBlock(BlockBehaviour.Properties.of()));
+    public static final BlockRegistryObject<BlockTile.BlockTileModel<TileEntityReplicator, Machine<TileEntityReplicator>>, ItemBlockTooltip<BlockTile.BlockTileModel<TileEntityReplicator, Machine<TileEntityReplicator>>>> REPLICATOR
+            = BLOCKS.registerDetails("replicator", () -> new BlockTile.BlockTileModel<>(ModBlockTypes.REPLICATOR, properties -> properties.mapColor(MapColor.METAL)))
+            .forItemHolder(holder -> holder
+                    .addAttachmentOnlyContainers(ContainerType.CHEMICAL, () -> ChemicalTanksBuilder.builder()
+                            .addBasic(TileEntityReplicator.MAX_CHEMICAL)
+                            .build())
+                    .addAttachmentOnlyContainers(ContainerType.ITEM, () -> ItemSlotsBuilder.builder()
+                            .addInput(1)
+                            .addOutput()
+                            .build())
+            );
 
     public static void register(IEventBus bus) {
         BLOCKS.register(bus);
